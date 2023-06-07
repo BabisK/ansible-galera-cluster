@@ -11,7 +11,7 @@
 
 - name: galera_monitoring | restarting mysql on first node
   service: # noqa 503
-    name: "{{ mariadb_systemd_service_name }}"
+    name: "{{ systemd_service_name }}"
     state: "restarted"
   become: true
   when: >
@@ -20,7 +20,7 @@
 
 - name: galera_monitoring | waiting for mysql to start on first node
   service: # noqa 503
-    name: "{{ mariadb_systemd_service_name }}"
+    name: "{{ systemd_service_name }}"
     state: "started"
   become: true
   register: "_mariadb_galera_cluster_node"
@@ -35,7 +35,7 @@
 
 - name: galera_monitoring | restarting mysql on additional servers
   service: # noqa 503
-    name: "{{ mariadb_systemd_service_name }}"
+    name: "{{ systemd_service_name }}"
     state: "restarted"
   become: true
   throttle: 1
@@ -45,7 +45,7 @@
 
 - name: galera_monitoring | waiting for mysql to start on other nodes
   service: # noqa 503
-    name: "{{ mariadb_systemd_service_name }}"
+    name: "{{ systemd_service_name }}"
     state: "started"
   become: true
   register: "_mariadb_galera_cluster_node"

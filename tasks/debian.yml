@@ -12,20 +12,20 @@
   become: true
   loop:
 
-- name: debian | adding MariaDB Repo Keys
+- name: debian | adding Repo Keys
   apt_key:
-    keyserver: "{{ mariadb_debian_repo_keyserver }}"
-    id: "{{ mariadb_debian_repo_key }}"
+    keyserver: "{{ debian_repo_keyserver }}"
+    id: "{{ debian_repo_key }}"
     state: "present"
   become: true
-  when: galera_enable_mariadb_repo|bool and not mariadb_debian_repo_key_url is defined
+  when: galera_enable_mariadb_repo|bool and not debian_repo_key_url is defined
 
-- name: debian | adding MariaDB Repo Keys
+- name: debian | adding Repo Keys
   apt_key:
-    url: "{{ mariadb_debian_repo_key_url }}"
+    url: "{{ debian_repo_key_url }}"
     state: "present"
   become: true
-  when: galera_enable_mariadb_repo|bool and mariadb_debian_repo_key_url is defined
+  when: galera_enable_mariadb_repo|bool and debian_repo_key_url is defined
 
 - name: debian | pinning MariaDB Repo
   template:
@@ -33,14 +33,36 @@
     dest: "/etc/apt/preferences.d/mariadb"
     mode: "0644"
   become: true
-  when: galera_enable_mariadb_repo|bool
+  when: vendor == 'mariadb' and galera_enable_mariadb_repo|bool
 
-- name: debian | adding mariadb repo
+- name: debian | pinning MySQL Repo
+  template:
+    src: "etc/apt/preferences.d/mysql.j2"
+    dest: "/etc/apt/preferences.d/mysql"
+    mode: "0644"
+  become: true
+  when: vendor == 'mysql' and galera_enable_mariadb_repo|bool
+
+- name: debian | adding MariaDB repo
   apt_repository:
     repo: "{{ mariadb_debian_repo }}"
     state: "present"
   become: true
-  when: galera_enable_mariadb_repo|bool
+  when: vendor == 'mariadb' and galera_enable_mariadb_repo|bool
+
+- name: debian | adding MySQL repo
+  apt_repository:
+    repo: "{{ mysql_debian_repo }}"
+    state: "present"
+  become: true
+  when: vendor == 'mysql' and galera_enable_mariadb_repo|bool
+
+- name: debian | adding Galera repo
+  apt_repository:
+    repo: "{{ galera_debian_repo }}"
+    state: "present"
+  become: true
+  when: vendor == 'mysql' and galera_enable_mariadb_repo|bool
 
 - name: debian | precreate /etc/mysql/conf.d in case we need to add mariadb_config_overrides file
   file:
@@ -63,3 +85,36 @@
     name: "{{ (galera_sst_method == 'mariabackup') | ternary( mariadb_packages | union( mariabackup_packages ), mariadb_packages ) }}"
     state: "present"
   become: true
+  when: vendor == 'mariadb'
+
+- name: debian | installing mysql-galera packages
+  apt:
+    name: "{{ mysql_packages }}"
+    state: "present"
+  become: true
+  when: vendor == 'mysql'
+
+- name: debian | verify apparmor profile is disabled
+  command:
+    cmd: "stat /etc/apparmor.d/disable/usr.sbin.mysqld"
+  become: true
+  register: mysqld_apparmor_profile
+  when: vendor == 'mysql'
+  failed_when: false
+  changed_when: false
+
+- name: debian | disable apparmor profile
+  command:
+    cmd: "ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/usr.sbin.mysqld"
+  become: true
+  when: vendor == 'mysql' and mysqld_apparmor_profile.rc != 0
+  changed_when: false
+
+- name: debian | remove apparmor profile
+  command:
+    cmd: "apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld"
+  become: true
+  register: mysqld_apparmor_remove
+  when: vendor == 'mysql' and mysqld_apparmor_profile.rc != 0
+  changed_when: mysqld_apparmor_remove.rc == 0
+  failed_when: mysqld_apparmor_remove.rc != 0 and mysqld_apparmor_remove.rc != 254

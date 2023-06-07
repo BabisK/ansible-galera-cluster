@@ -2,6 +2,6 @@
 - name: Example Playbook
   hosts: all
   tasks:
-    - name: Include ansible-mariadb-galera-cluster
+    - name: Include ansible-galera-cluster
       include_role:
-        name: ansible-mariadb-galera-cluster
+        name: ansible-galera-cluster

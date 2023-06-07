@@ -1,21 +1,29 @@
 ---
-# defaults file for ansible-mariadb-galera-cluster
+# defaults file for ansible-galera-cluster
+
+# Define database vendor, either mariadb or mysql
+vendor: mariadb
+
+# Define vendor version
+# mysql: 8.0, 5.7, 5.6, 5.5
+# mariadb: 10.6, 10.5, 10.4
+vendor_version: "10.6"
 
 # MariaDB setting
-
-# Define mariadb version
-mariadb_version: "10.6"
 
 # Defines if we should enable the MariaDB repo or use version within OS repos.
 galera_enable_mariadb_repo: true
 
 # Defines repository settings for apt
-mariadb_debian_repo: "deb [arch=amd64,i386,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/{{ mariadb_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
-mariadb_debian_repo_keyserver: "keyserver.ubuntu.com"
+mariadb_debian_repo: "deb [arch=amd64,i386,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/{{ vendor_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
+mysql_debian_repo: "deb http://releases.galeracluster.com/mysql-wsrep-{{ vendor_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
+galera_debian_repo: "deb http://releases.galeracluster.com/galera-{{ galera_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
+debian_repo_keyserver: "keyserver.ubuntu.com"
 mariadb_debian_repo_pin: "nyc2.mirrors.digitalocean.com"
+mysql_debian_repo_pin: "releases.galeracluster.com"
 
 # Defines repository settings for rpm
-mariadb_redhat_repo: "https://yum.mariadb.org/{{ mariadb_version }}/{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}-amd64"
+mariadb_redhat_repo: "https://yum.mariadb.org/{{ vendor_version }}/{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}-amd64"
 mariadb_redhat_repo_key: "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"
 
 # bind address for MariaDB's 3306 port.
@@ -175,8 +183,8 @@ galera_sst_method: "{{ (mariadb_tls_files and mariadb_tls_files|length == 3 and 
 # Tune system swappiness. Default value "auto" means don't tune.
 # Recommended value based on:
 # https://mariadb.com/kb/en/mariadb-memory-allocation/#swappiness
-# mariadb_swappiness: 1
-mariadb_swappiness: "auto"
+# swappiness: 1
+swappiness: "auto"
 
 # Add the posibility to adjust the OOM score (only works for SystemD)
 mariadb_oom_score_adjust: 0
@@ -248,11 +256,11 @@ mariadb_real_cpus: "{{ ansible_processor_count * ansible_processor_cores }}"
 
 # Create these MariaDB databases during installation
 # Example:
-# mariadb_databases:
+# databases:
 #   - name: keystone
 #   - name: mydb
 #     init_script: files/init_mydb.sql
-mariadb_databases: []
+databases: []
 
 # Define additional MySQL users
 mariadb_mysql_users: []

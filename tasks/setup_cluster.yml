@@ -89,7 +89,7 @@
 - name: setup_cluster | cluster rolling restart - apply config changes (first node)
   include_tasks: manage_node_state.yml
   vars:
-    mariadb_systemd_service_state: "restarted"
+    systemd_service_state: "restarted"
   with_items: "{{ galera_mysql_first_node }}"
   when: >
     galera_cluster_configured.stat.exists and
@@ -98,7 +98,7 @@
 - name: setup_cluster | cluster rolling restart - apply config changes (other nodes)
   include_tasks: manage_node_state.yml
   vars:
-    mariadb_systemd_service_state: "restarted"
+    systemd_service_state: "restarted"
   with_items: "{{ ansible_play_hosts | difference(galera_mysql_first_node) }}"
   when: >
     galera_cluster_configured.stat.exists and
@@ -108,7 +108,7 @@
 - name: setup_cluster | cluster bootstrap - stopping mysql to (re)configure cluster (other nodes)
   include_tasks: manage_node_state.yml
   vars:
-    mariadb_systemd_service_state: "stopped"
+    systemd_service_state: "stopped"
   with_items: "{{ ansible_play_hosts | difference(galera_mysql_first_node) }}"
   when: >
     not galera_cluster_configured.stat.exists
@@ -116,13 +116,13 @@
 - name: setup_cluster | cluster bootstrap - stopping mysql to (re)configure cluster (first node)
   include_tasks: manage_node_state.yml
   vars:
-    mariadb_systemd_service_state: "stopped"
+    systemd_service_state: "stopped"
   with_items: "{{ galera_mysql_first_node }}"
   when: >
     not galera_cluster_configured.stat.exists
 
-- name: setup_cluster | custer bootstrap - killing lingering mysql processes to ensure mysql is stopped
-  command: "pkill {{ mariadb_systemd_service_name }}"  # noqa ignore-errors
+- name: setup_cluster | cluster bootstrap - killing lingering mysql processes to ensure mysql is stopped
+  command: "pkill {{ systemd_service_name }}"  # noqa ignore-errors
   become: true
   ignore_errors: true
   when: not galera_cluster_configured.stat.exists
@@ -139,7 +139,7 @@
     inventory_hostname == galera_mysql_first_node
 
 - name: setup_cluster | cluster bootstrap - bootstrapping first node
-  command: "/usr/bin/galera_new_cluster"
+  command: "{{ galera_bootsrap_cmd }}"
   become: true
   when: >
     not galera_cluster_configured.stat.exists and
@@ -148,7 +148,7 @@
 - name: setup_cluster | cluster bootstrap - ensure first node is fully started before joining other nodes
   include_tasks: manage_node_state.yml
   vars:
-    mariadb_systemd_service_state: "started"
+    systemd_service_state: "started"
   with_items: "{{ galera_mysql_first_node }}"
   when: >
     not galera_cluster_configured.stat.exists
@@ -156,7 +156,7 @@
 - name: setup_cluster | cluster bootstrap - joining galera cluster
   include_tasks: manage_node_state.yml
   vars:
-    mariadb_systemd_service_state: "started"
+    systemd_service_state: "started"
   with_items: "{{ ansible_play_hosts | difference(galera_mysql_first_node) }}"
   when: >
     not galera_cluster_configured.stat.exists
@@ -175,7 +175,7 @@
 - name: setup_cluster | cluster bootstrap - restarting first node with final galera config
   include_tasks: manage_node_state.yml
   vars:
-    mariadb_systemd_service_state: "restarted"
+    systemd_service_state: "restarted"
   with_items: "{{ galera_mysql_first_node }}"
   when: >
     not galera_cluster_configured.stat.exists

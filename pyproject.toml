@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "ansible-mariadb-galera-cluster"
+name = "ansible-galera-cluster"
 version = "0.1.0"
 description = ""
-authors = ["Larry Smith Jr. <mrlesmithjr@gmail.com>"]
+authors = ["Larry Smith Jr. <mrlesmithjr@gmail.com>", "Babis Kaidos <babis_k@outlook.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8.1,<4.0"

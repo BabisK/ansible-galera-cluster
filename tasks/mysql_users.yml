@@ -16,7 +16,7 @@
       when: mariadb_sst_username__found.failed
   delegate_to: "{{ galera_mysql_first_node }}"
   run_once: true
-  when: mariadb_sst_user_plugin == "unix_socket"
+  when: vendor == "mariadb" and mariadb_sst_user_plugin == "unix_socket"
 
 - name: Create definition for mariadb_sst_user via unix_socket
   set_fact:
@@ -28,7 +28,7 @@
         priv: "*.*:RELOAD,PROCESS,LOCK TABLES,BINLOG MONITOR"
   delegate_to: "{{ galera_mysql_first_node }}"
   run_once: true
-  when: mariadb_sst_user_plugin == "unix_socket"
+  when: vendor == "mariadb" and mariadb_sst_user_plugin == "unix_socket"
 
 - name: Create definition for mariadb_sst_user via mysql_native_password
   set_fact:
@@ -40,7 +40,7 @@
         priv: "*.*:RELOAD,PROCESS,LOCK TABLES,BINLOG MONITOR"
   delegate_to: "{{ galera_mysql_first_node }}"
   run_once: true
-  when: mariadb_sst_user_plugin == "mysql_native_password"
+  when: vendor == "mariadb" and mariadb_sst_user_plugin == "mysql_native_password"
 
 - name: mysql_users | create MySQL users
   community.mysql.mysql_user:
@@ -57,9 +57,8 @@
     priv: "{{ item.0.priv | default('*.*:USAGE') }}"
     state: "{{ item.0.state | default('present') }}"
   become: true
-  no_log: true
   delegate_to: "{{ galera_mysql_first_node }}"
   run_once: true
   with_subelements:
-    - "{{ (galera_sst_method == 'mariabackup') | ternary( mariadb_mysql_users | union( mariadb_sst_user ), mariadb_mysql_users ) }}"
-    - "hosts"
+    - "{{ (galera_sst_method == 'mariabackup') | ternary( mariadb_mysql_users | union( mariadb_sst_user | default([]) ), mariadb_mysql_users ) }}"
+    - hosts

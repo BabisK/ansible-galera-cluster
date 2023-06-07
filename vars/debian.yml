@@ -7,13 +7,20 @@ mariadb_pre_req_packages:
   - "rsync"
   - "gnupg"
   - "python-pymysql"
+mysql_debian_repo_key: "0xBC19DDBA"
 mariadb_debian_repo_key: "0xF1656F24C74CD1D8"
+debian_repo_key: "{{ (vendor == 'mariadb') | ternary(mariadb_debian_repo_key, mysql_debian_repo_key) }}"
 mariadb_packages:
   - "mariadb-server"
+mysql_packages:
+  - "mysql-server"
+  - "galera-{{ galera_version }}"
 mariabackup_packages:
   - "mariadb-backup"
 mariadb_certificates_dir: "/etc/mysql/certificates"
 mariadb_systemd_service_name: "mysql"
+mysql_systemd_service_name: "mysql"
+systemd_service_name: "{{ (vendor == 'mariadb') | ternary(mariadb_systemd_service_name, mysql_systemd_service_name) }}"
 mariadb_confs:
   - "etc/mysql/debian.cnf"
   - "etc/mysql/my.cnf"
@@ -21,3 +28,5 @@ mariadb_confs:
 mariadb_temp_confs:
   - "etc/mysql/conf.d/galera.cnf"
 galera_wsrep_provider: "/usr/lib/galera/libgalera_smm.so"
+galera_version: "{{ ((vendor == 'mysql' and (vendor_version == '5.5' or vendor_version == '5.6' or vendor_version == '5.7')) or (vendor == 'mariadb' and (vendor_version == '5.5' or vendor_version == '10.0' or vendor_version == '10.1' or vendor_version == '10.2' or vendor_version == '10.3' or vendor_version == '10.4'))) | ternary(3, 4) }}"
+galera_bootsrap_cmd: "{{ (vendor == 'mariadb') | ternary('/usr/bin/galera_new_cluster', '/usr/bin/mysqld_bootstrap') }}"

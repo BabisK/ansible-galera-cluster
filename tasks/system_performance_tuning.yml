@@ -20,11 +20,11 @@
 - name: system_perfromance_tuning | configure swappiness
   sysctl:
     name: "vm.swappiness"
-    value: "{{ mariadb_swappiness }}"
+    value: "{{ swappiness }}"
     state: "present"
   become: true
   when:
-    - mariadb_swappiness != 'auto'
+    - swappiness != 'auto'
     - "not (
       (ansible_virtualization_role == 'guest')
       and (ansible_virtualization_type == 'lxc')

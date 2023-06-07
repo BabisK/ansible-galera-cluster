@@ -4,7 +4,7 @@
 
 **Table of Contents**  _generated with [DocToc](https://github.com/thlorenz/doctoc)_
 
--   [ansible-mariadb-galera-cluster](#ansible-mariadb-galera-cluster)
+-   [ansible-galera-cluster](#ansible-galera-cluster)
     -   [Build Status](#build-status)
     -   [Requirements](#requirements)
     -   [Vagrant](#vagrant)
@@ -16,7 +16,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# ansible-mariadb-galera-cluster
+# ansible-galera-cluster
 
 An [Ansible](https://www.ansible.com) role to install/configure a [MariaDB-Galera Cluster](https://mariadb.com/kb/en/mariadb/what-is-mariadb-galera-cluster/)
 

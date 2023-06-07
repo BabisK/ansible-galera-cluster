@@ -1,5 +1,5 @@
 ---
-# vars file for ansible-mariadb-galera-cluster
+# vars file for ansible-galera-cluster
 
 galera_cluster_nodes: "\
   {% set _galera_cluster_nodes = [] %}\

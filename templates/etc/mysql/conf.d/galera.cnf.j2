@@ -2,8 +2,10 @@
 binlog_format=ROW
 default_storage_engine=InnoDB
 innodb_autoinc_lock_mode=2
+{% if vendor == 'mariadb' %}
 query_cache_size=0
 query_cache_type=0
+{% endif %}
 
 #
 # Allow server to accept connections on this interface
@@ -43,7 +45,10 @@ ssl_cert = {{ mariadb_certificates_dir }}/{{ mariadb_tls_files.server_cert.name 
 ssl_key = {{ mariadb_certificates_dir }}/{{ mariadb_tls_files.server_key.name }}
 {% endif %}
 
+{# MariaDB reads wsrep options from [galera] section, while mysql reads them from mysqld section #}
+{% if vendor == 'mariadb' %}
 [galera]
+{% endif %}
 wsrep_on=ON
 wsrep_node_name={{ ansible_hostname }}
 wsrep_provider={{ galera_wsrep_provider }}
